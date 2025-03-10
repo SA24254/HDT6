@@ -1,0 +1,57 @@
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
+
+import java.util.*;
+
+class MainTest {
+    private Map<String, Pokemon> testAllPokemons;
+    private Set<String> testUserCollection;
+    private Main main;
+
+    @BeforeEach
+    void setUp() {
+        testAllPokemons = new HashMap<>();
+        testUserCollection = new HashSet<>();
+        main = new Main();
+
+        // Configurar datos de prueba
+        testAllPokemons.put("Pikachu", new Pokemon("Pikachu", "Electric", "", "Static"));
+        testAllPokemons.put("Charmander", new Pokemon("Charmander", "Fire", "", "Blaze"));
+    }
+
+    // Prueba para operación 1: Agregar Pokémon
+    @Test
+    void testAddPokemonValid() {
+        Scanner scanner = new Scanner("Pikachu");
+        main.allPokemons = testAllPokemons;
+        main.userCollection = testUserCollection;
+
+        main.addPokemon(scanner);
+        assertTrue(testUserCollection.contains("Pikachu"));
+    }
+
+    @Test
+    void testAddPokemonDuplicate() {
+        Scanner scanner = new Scanner("Pikachu");
+        main.allPokemons = testAllPokemons;
+        main.userCollection = testUserCollection;
+        testUserCollection.add("Pikachu"); // Simular que ya existe
+
+        main.addPokemon(scanner);
+        assertEquals(1, testUserCollection.size()); // No debe agregar duplicado
+    }
+
+    // Prueba para operación 5: Buscar por habilidad
+    @Test
+    void testSearchByAbilityCaseInsensitive() {
+        Scanner scanner = new Scanner("static");
+        main.allPokemons = testAllPokemons;
+
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        System.setOut(new PrintStream(output));
+
+        main.searchByAbility(scanner);
+        assertTrue(output.toString().contains("Pikachu"));
+    }
+}
