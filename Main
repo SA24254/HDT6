@@ -1,0 +1,138 @@
+import java.util.*;
+
+// Clase que representa un Pokémon con todos sus atributos
+class Pokemon {
+    private String name;
+    private String type1;
+    private String type2;
+    private String ability;
+    // Otros atributos según el archivo CSV
+
+    public Pokemon(String name, String type1, String type2, String ability) {
+        this.name = name;
+        this.type1 = type1;
+        this.type2 = type2;
+        this.ability = ability;
+    }
+
+    // Getters
+    public String getName() { return name; }
+    public String getType1() { return type1; }
+    public String getType2() { return type2; }
+    public String getAbility() { return ability; }
+
+    @Override
+    public String toString() {
+        return "Nombre: " + name + ", Tipo1: " + type1 + ", Tipo2: " + type2 + ", Habilidad: " + ability;
+    }
+}
+
+// Factory para crear Maps según la elección del usuario
+class MapFactory {
+    public static Map<String, Pokemon> createMap(int choice) {
+        switch (choice) {
+            case 1: return new HashMap<>();
+            case 2: return new TreeMap<>();
+            case 3: return new LinkedHashMap<>();
+            default: throw new IllegalArgumentException("Opción no válida");
+        }
+    }
+}
+
+// Clase principal con el menú y lógica de interacción
+public class Main {
+    private static Map<String, Pokemon> allPokemons;
+    private static Set<String> userCollection = new HashSet<>();
+
+    // Método recursivo para mostrar el menú
+    public static void showMenu(Scanner scanner) {
+        System.out.println("\nOpciones:");
+        System.out.println("1. Agregar Pokémon");
+        System.out.println("2. Mostrar datos de Pokémon");
+        System.out.println("3. Mostrar colección ordenada por Tipo1");
+        System.out.println("4. Mostrar todos ordenados por Tipo1");
+        System.out.println("5. Buscar por habilidad");
+        System.out.println("6. Salir");
+        System.out.print("Seleccione: ");
+
+        int option = scanner.nextInt();
+        scanner.nextLine();  // Consumir nueva línea
+
+        switch (option) {
+            case 1: addPokemon(scanner); break;
+            case 2: showPokemonData(scanner); break;
+            case 3: showUserCollection(); break;
+            case 4: showAllByType1(); break;
+            case 5: searchByAbility(scanner); break;
+            case 6: System.exit(0);
+            default: System.out.println("Opción inválida");
+        }
+
+        showMenu(scanner);  // Llamada recursiva
+    }
+
+    // Operación 1: Agregar Pokémon a la colección
+    private static void addPokemon(Scanner scanner) {
+        System.out.print("Nombre del Pokémon: ");
+        String name = scanner.nextLine();
+        if (!allPokemons.containsKey(name)) {
+            System.out.println("Error: Pokémon no existe");
+        } else if (userCollection.contains(name)) {
+            System.out.println("Error: Ya está en tu colección");
+        } else {
+            userCollection.add(name);
+            System.out.println("Agregado exitosamente");
+        }
+    }
+
+    // Operación 2: Mostrar datos de un Pokémon
+    private static void showPokemonData(Scanner scanner) {
+        System.out.print("Nombre del Pokémon: ");
+        String name = scanner.nextLine();
+        Pokemon p = allPokemons.get(name);
+        System.out.println(p != null ? p : "No encontrado");
+    }
+
+    // Operación 3: Mostrar colección ordenada por Tipo1
+    private static void showUserCollection() {
+        List<Pokemon> sorted = new ArrayList<>();
+        for (String name : userCollection) {
+            sorted.add(allPokemons.get(name));
+        }
+        sorted.sort(Comparator.comparing(Pokemon::getType1).thenComparing(Pokemon::getName));
+        sorted.forEach(p -> System.out.println(p.getName() + " - " + p.getType1()));
+    }
+
+    // Operación 4: Mostrar todos ordenados por Tipo1
+    private static void showAllByType1() {
+        List<Pokemon> all = new ArrayList<>(allPokemons.values());
+        all.sort(Comparator.comparing(Pokemon::getType1).thenComparing(Pokemon::getName));
+        all.forEach(p -> System.out.println(p.getName() + " - " + p.getType1()));
+    }
+
+    // Operación 5: Buscar por habilidad
+    private static void searchByAbility(Scanner scanner) {
+        System.out.print("Habilidad a buscar: ");
+        String ability = scanner.nextLine();
+        allPokemons.values().stream()
+            .filter(p -> p.getAbility().equalsIgnoreCase(ability))
+            .forEach(p -> System.out.println(p.getName()));
+    }
+
+    // Método principal
+    public static void main(String[] args) {
+        // Configurar Map según Factory
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Seleccione implementación de Map:");
+        System.out.println("1. HashMap\n2. TreeMap\n3. LinkedHashMap");
+        int choice = scanner.nextInt();
+        allPokemons = MapFactory.createMap(choice);
+
+        // Leer archivo CSV (simulado)
+        // En un caso real, leeríamos el archivo aquí
+        allPokemons.put("Pikachu", new Pokemon("Pikachu", "Electric", "None", "Static"));
+        allPokemons.put("Charmander", new Pokemon("Charmander", "Fire", "None", "Blaze"));
+
+        showMenu(scanner);
+    }
+}
